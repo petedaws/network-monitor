@@ -38,7 +38,6 @@ def vendor_lookup(scan,vendors):
   for mac in scan.keys():
     if not vendor_mapping.get(mac):
       vendors[mac] = urllib2.urlopen(conf['lookup_url']+conf['lookup_id']+'/'+mac[:8].replace(':','')).read().split(',')
-      print vendors[mac]
       scan[mac]['vendor_details'] = vendors[mac]
 
 while 1:
@@ -50,21 +49,13 @@ while 1:
   host_join = set(current_scan.keys()) - set(last_scan.keys())
   host_left = set(last_scan.keys()) - set(current_scan.keys())
   host_new = set(current_scan.keys()) - set(cumulative_scan.keys())
-  print 'current_scan'
-  pprint.pprint(current_scan.keys())
-  print 'last_scan' 
-  pprint.pprint(last_scan.keys())
-  print 'cumulative_scan'
-  pprint.pprint(cumulative_scan.keys())
   last_scan = current_scan
   cumulative_scan.update(current_scan)
   open('cumulative_scan.txt','wb').write(pprint.pformat(cumulative_scan))
   if len(host_join):
       print 'Host Joined %s' % host_join
-      pass
   if len(host_left):
       print 'Host Left %s' % host_left
-      pass    
   if len(host_new):
       output = 'The following new hosts joined the network:\n'
       for mac in host_new:
@@ -73,5 +64,10 @@ while 1:
       msg = MIMEText(output)
       msg['Subject'] = 'New detected on %s' % (conf['subnet'])
       msg['From'] = conf['email_source']
-      print output 
+      print output
+      s = smtplib.SMTP(conf['email_server'])
+      s.starttls()
+      s.login(conf['email'],conf['password'])
+      s.sendmail(conf['email_source'],[conf['email_out']],msg.as_string())
+      s.quit() 
   time.sleep(10)
