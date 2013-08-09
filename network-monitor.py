@@ -22,7 +22,7 @@ while 1:
   lost_macs = set(get_mac_list(last_scan)) - set(get_mac_list(current_scan))
   last_scan = current_scan
   cumulative_scan.update(current_scan)
-  open('cumulative_scan.txt','wb').write(pprint.pprint(cumulative_scan))
+  open('cumulative_scan.txt','wb').write(pprint.pformat(cumulative_scan))
   if len(new_macs):
       print 'New hosts found %s' % new_macs
   if len(lost_macs):
