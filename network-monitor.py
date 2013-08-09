@@ -15,11 +15,11 @@ while 1:
   print 'running scan..',
   current_scan = nm.scan('192.168.1.1/24 -sn')
   print 'complete'
-  new_macs = set(get_mac_list()) - set(get_mac_list(last_scan))
+  new_macs = set(get_mac_list(current_scan)) - set(get_mac_list(last_scan))
   lost_macs = set(get_mac_list(last_scan)) - set(get_mac_list(current_scan))
   last_scan = current_scan
   cumulative_scan.update(current_scan)
-  open('cumulative_scan.txt','wb').write(pprint.pprint(cumulative_scan)
+  open('cumulative_scan.txt','wb').write(pprint.pprint(cumulative_scan))
   if len(new_macs):
       print 'New hosts found %s' % new_macs
   if len(lost_macs):
