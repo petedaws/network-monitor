@@ -1,3 +1,9 @@
+#! /usr/bin/python
+
+# Note: this program requires python-nmap 0.3.1 or greater. 
+# Get it from http://xael.org/norman/python/python-nmap/
+# nmap must also be installed on the host machine that executes the monitoring
+
 import nmap
 import pprint
 import time
@@ -63,4 +69,4 @@ while 1:
       s.login(conf['email'],conf['password'])
       s.sendmail(conf['email_source'],[conf['email_out']],msg.as_string())
       s.quit() 
-  time.sleep(10)
+  time.sleep(conf['scan_interval'])
