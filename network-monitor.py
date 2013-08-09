@@ -1,12 +1,13 @@
 import nmap
 import pprint
 import time
+import sys
 nm = nmap.PortScanner()
 
 mac_list = []
 
 while 1:
-  print 'running scan..',
+  sys.stdout.write('running scan..')
   r = nm.scan('192.168.1.1/24 -sn')
   print 'complete'
   current_mac_list = [i['addresses'].get('mac') for i in r['scan'].values()]
