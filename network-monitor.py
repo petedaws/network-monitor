@@ -3,13 +3,18 @@ import pprint
 import time
 import sys
 import pprint
+import urllib2
+
 nm = nmap.PortScanner()
 
 last_scan = {}
+vendor_mapping = {}
 try:
   cumulative_scan = eval(open('cumulative_scan.txt','rb').read())
 except Exception,e:
   cumulative_scan = {}
+conf = eval(open('conf.cfg','rb').read())
+
 
 def scan_reformat(scan):
   sr = {}
@@ -17,6 +22,7 @@ def scan_reformat(scan):
     for host in scan['scan'].values():
       if 'addresses' in host:
         if 'mac' in host['addresses']:
+          host['vendor_details'] = vendor_mapping.get(host['addresses']['mac']) 
           sr[host['addresses']['mac']] = host
         else:
           sr[host['addresses']['ipv4']] = host
@@ -24,11 +30,19 @@ def scan_reformat(scan):
   else:
     return {}
 
+def vendor_lookup(scan,vendors):
+  for mac in scan.keys():
+    if not vendor_mapping.get(mac):
+      vendors[mac] = urllib2.urlopen(conf['lookup_url']+conf['lookup_id']+'/'+mac[:8].replace(':','')).read().split(',')
+      print vendors[mac]
+
+
 while 1:
   print 'running scan..',
-  s = nm.scan('192.168.1.1/24 -sn')
+  s = nm.scan(conf['subnet']+ ' -sn')
   print 'complete'
   current_scan = scan_reformat(s)
+  vendor_lookup(current_scan,vendor_mapping)
   host_join = set(current_scan.keys()) - set(last_scan.keys())
   host_left = set(last_scan.keys()) - set(current_scan.keys())
   host_new = set(current_scan.keys()) - set(cumulative_scan.keys())
