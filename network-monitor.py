@@ -4,6 +4,8 @@ import time
 import sys
 import pprint
 import urllib2
+import smtplib
+from email.mime.text import MIMEText
 
 nm = nmap.PortScanner()
 
@@ -15,6 +17,8 @@ except Exception,e:
   cumulative_scan = {}
 conf = eval(open('conf.cfg','rb').read())
 
+if not conf['password']:
+	conf['password'] = open('%s.password' % conf['email'],'rb').read()
 
 def scan_reformat(scan):
   sr = {}
@@ -35,7 +39,7 @@ def vendor_lookup(scan,vendors):
     if not vendor_mapping.get(mac):
       vendors[mac] = urllib2.urlopen(conf['lookup_url']+conf['lookup_id']+'/'+mac[:8].replace(':','')).read().split(',')
       print vendors[mac]
-
+      scan[mac]['vendor_details'] = vendors[mac]
 
 while 1:
   print 'running scan..',
@@ -62,6 +66,12 @@ while 1:
       print 'Host Left %s' % host_left
       pass    
   if len(host_new):
-      print 'New Host detected %s' % host_new
-      pass
+      output = 'The following new hosts joined the network:\n'
+      for mac in host_new:
+        output += pprint.pformat(cumulative_scan[mac])
+        output += '\n\n'
+      msg = MIMEText(output)
+      msg['Subject'] = 'New detected on %s' % (conf['subnet'])
+      msg['From'] = conf['email_source']
+      print output 
   time.sleep(10)
