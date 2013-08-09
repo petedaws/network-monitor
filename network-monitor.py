@@ -5,11 +5,14 @@ import sys
 import pprint
 nm = nmap.PortScanner()
 
-last_scan = []
+last_scan = {}
 cumulative_scan = {}
 
 def get_mac_list(scan):
-  return [i['addresses'].get('mac') for i in scan['scan'].values()]
+  if 'scan' in scan:
+    return [i['addresses'].get('mac') for i in scan['scan'].values()]
+  else:
+    return []
 
 while 1:
   print 'running scan..',
