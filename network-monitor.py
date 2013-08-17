@@ -56,6 +56,21 @@ while 1:
   last_scan = current_scan
   cumulative_scan.update(current_scan)
   open('cumulative_scan.txt','wb').write(pprint.pformat(cumulative_scan))
+  if len(host_join):
+      logfile = open(conf['logfile'],'ab')
+      for mac in host_join:
+          ip = cumulative_scan[mac]['addresses'].get('ipv4')
+          macaddr = cumulative_scan[mac]['addresses'].get('mac')
+          if len(cumulative_scan[mac]['vendor_details']) > 1: 
+              vendor = cumulative_scan[mac]['vendor_details'][1]
+          else:
+              vendor = ''
+          hostname = cumulative_scan[mac]['hostname']
+          iph = hostname + '-' + ip
+          t = time.localtime()
+          tm = time.strftime('%Y-%m-%d %H:%M:%S',t)
+          logfile.write('%s: JOIN NETWORK\t%s\t%s\t%s\n' % (tm,iph,macaddr,vendor)) 
+      logfile.close()
   if len(host_new):
       output = 'The following new hosts joined the network:\n'
       for mac in host_new:
