@@ -46,6 +46,22 @@ def vendor_lookup(scan,vendors):
       vendors[mac] = urllib2.urlopen(conf['lookup_url']+conf['lookup_id']+'/'+mac[:8].replace(':','')).read().split(',')
       scan[mac]['vendor_details'] = vendors[mac]
 
+def log(log_type,hosts,scan_dict):
+      logfile = open(conf['logfile'],'ab')
+      for mac in hosts:
+          ip = scan_dict[mac]['addresses'].get('ipv4')
+          macaddr = scan_dict[mac]['addresses'].get('mac')
+          if len(scan_dict[mac]['vendor_details']) > 1: 
+              vendor = scan_dict[mac]['vendor_details'][1]
+          else:
+              vendor = ''
+          hostname = scan_dict[mac]['hostname']
+          iph = hostname + '-' + ip
+          t = time.localtime()
+          tm = time.strftime('%Y-%m-%d %H:%M:%S',t)
+          logfile.write('%s: %s\t%s\t%s\t%s\n' % (tm,log_type,iph,macaddr,vendor)) 
+      logfile.close()	
+
 while 1:
   s = nm.scan(conf['subnet']+ ' -sn')
   current_scan = scan_reformat(s)
@@ -57,21 +73,11 @@ while 1:
   cumulative_scan.update(current_scan)
   open('cumulative_scan.txt','wb').write(pprint.pformat(cumulative_scan))
   if len(host_join):
-      logfile = open(conf['logfile'],'ab')
-      for mac in host_join:
-          ip = cumulative_scan[mac]['addresses'].get('ipv4')
-          macaddr = cumulative_scan[mac]['addresses'].get('mac')
-          if len(cumulative_scan[mac]['vendor_details']) > 1: 
-              vendor = cumulative_scan[mac]['vendor_details'][1]
-          else:
-              vendor = ''
-          hostname = cumulative_scan[mac]['hostname']
-          iph = hostname + '-' + ip
-          t = time.localtime()
-          tm = time.strftime('%Y-%m-%d %H:%M:%S',t)
-          logfile.write('%s: JOIN NETWORK\t%s\t%s\t%s\n' % (tm,iph,macaddr,vendor)) 
-      logfile.close()
+    log('JOINED',host_join,cumulative_scan)
+  if len(host_left):
+    log('LEFT  ',host_left,cumulative_scan)
   if len(host_new):
+      log('NEW   ',host_left,cumulative_scan)
       output = 'The following new hosts joined the network:\n'
       for mac in host_new:
         output += pprint.pformat(cumulative_scan[mac])
