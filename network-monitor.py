@@ -18,13 +18,13 @@ nm = nmap.PortScanner()
 last_scan = {}
 vendor_mapping = {}
 try:
-  cumulative_scan = eval(open('cumulative_scan.txt','rb').read())
+  cumulative_scan = eval(open('/home/pi/network-monitor/cumulative_scan.txt','rb').read())
 except Exception,e:
   cumulative_scan = {}
-conf = eval(open('conf.cfg','rb').read())
+conf = eval(open('/home/pi/network-monitor/conf.cfg','rb').read())
 
 if not conf['password']:
-	conf['password'] = open('%s.password' % conf['email'],'rb').read()
+	conf['password'] = open('/home/pi/network-monitor/%s.password' % conf['email'],'rb').read()
 
 def scan_reformat(scan):
   sr = {}
